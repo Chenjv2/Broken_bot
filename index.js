@@ -47,4 +47,21 @@ app.command("/brokenbot-joke", async ({ ack, respond }) => {
   } catch (err) {
     await respond({ text: "Failed to fetch a joke." });
   };
-}); 
+});  
+
+app.command("/brokenbot-weather", async ({ ack, respond, command }) => {
+  await ack();
+  const city = command.text.trim();
+  if (!city) {
+    await respond({ text: "Please provide a city name. Usage: /brokenbot-weather [city]" });
+    return;
+  } 
+  try {
+    const apiKey = process.env.OPENWEATHER_API_KEY;
+    const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric`);
+    const weather = response.data;
+    await respond({ text: `Weather in ${weather.name}:\n${weather.weather[0].description}\nTemperature: ${weather.main.temp}°C` });
+  } catch (err) {
+    await respond({ text: "Failed to fetch weather data. Please check the city name and try again." });
+  } 
+});
