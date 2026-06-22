@@ -32,7 +32,7 @@ app.command("/brokenbot-help", async ({ ack, respond }) => {
 
 app.command("/brokenbot-catfact", async ({ ack, respond }) => {
   await ack();
-
+  //console.log('1')
   try {
     const response = await axios.get("https://catfact.ninja/fact", {
       timeout: 3000,
@@ -64,27 +64,39 @@ app.command("/brokenbot-joke", async ({ ack, respond }) => {
 app.command("/brokenbot-weather", async ({ ack, respond, command }) => {
   await ack();
 
+  console.log("RAW command.text:", JSON.stringify(command.text));
+
   const city = command.text.trim();
 
+  console.log("Parsed city:", city);
+
+  if (!city) {
+    await respond({ text: "Please provide a city name. Usage: /brokenbot-weather [city]" });
+    return;
+  }
+
   try {
-    const response = await axios.get(
-      "https://api.openweathermap.org/data/2.5/weather",
-      {
-        params: {
-          q: city,
-          appid: process.env.OPENWEATHER_API_KEY,
-          units: "metric",
-        },
-        timeout: 5000,
+    const response = await axios.get("https://api.openweathermap.org/data/2.5/weather", {
+      params: {
+        q: city,
+        appid: process.env.OPENWEATHER_API_KEY,
+        units: "metric",
       },
-    );
+      timeout: 5000,
+    });
 
     const weather = response.data;
+
+    console.log("OpenWeather returned:", weather.name);
 
     await respond({
       text: `Weather in ${weather.name}:\n${weather.weather[0].description}\nTemperature: ${weather.main.temp}°C`,
     });
   } catch (err) {
+    console.error("Weather error status:", err.response?.status);
+    console.error("Weather error data:", err.response?.data);
+    console.error("Weather error message:", err.message);
+
     await respond({
       text: "Failed to fetch weather data. Please check the city name and try again.",
     });
