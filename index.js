@@ -1,6 +1,13 @@
 const axios = require("axios");
 require("dotenv").config();
-
+console.log("=== BOT START DEBUG ===");
+console.log("CWD:", process.cwd());
+console.log("File:", __filename);
+console.log("Has SLACK_BOT_TOKEN:", Boolean(process.env.SLACK_BOT_TOKEN));
+console.log("Has SLACK_APP_TOKEN:", Boolean(process.env.SLACK_APP_TOKEN));
+console.log("Has OPENWEATHER_API_KEY:", Boolean(process.env.OPENWEATHER_API_KEY));
+console.log("Weather key length:", process.env.OPENWEATHER_API_KEY?.length);
+console.log("=======================");
 const { App } = require("@slack/bolt");
 
 const app = new App({
