@@ -1,13 +1,5 @@
 const axios = require("axios");
 require("dotenv").config();
-console.log("=== BOT START DEBUG ===");
-console.log("CWD:", process.cwd());
-console.log("File:", __filename);
-console.log("Has SLACK_BOT_TOKEN:", Boolean(process.env.SLACK_BOT_TOKEN));
-console.log("Has SLACK_APP_TOKEN:", Boolean(process.env.SLACK_APP_TOKEN));
-console.log("Has OPENWEATHER_API_KEY:", Boolean(process.env.OPENWEATHER_API_KEY));
-console.log("Weather key length:", process.env.OPENWEATHER_API_KEY?.length);
-console.log("=======================");
 const { App } = require("@slack/bolt");
 
 const app = new App({
@@ -71,11 +63,9 @@ app.command("/brokenbot-joke", async ({ ack, respond }) => {
 app.command("/brokenbot-weather", async ({ ack, respond, command }) => {
   await ack();
 
-  console.log("RAW command.text:", JSON.stringify(command.text));
 
   const city = command.text.trim();
 
-  console.log("Parsed city:", city);
 
   if (!city) {
     await respond({ text: "Please provide a city name. Usage: /brokenbot-weather [city]" });
@@ -94,22 +84,45 @@ app.command("/brokenbot-weather", async ({ ack, respond, command }) => {
 
     const weather = response.data;
 
-    console.log("OpenWeather returned:", weather.name);
+    //console.log("OpenWeather returned:", weather.name);
 
     await respond({
       text: `Weather in ${weather.name}:\n${weather.weather[0].description}\nTemperature: ${weather.main.temp}°C`,
     });
   } catch (err) {
-    console.error("Weather error status:", err.response?.status);
-    console.error("Weather error data:", err.response?.data);
-    console.error("Weather error message:", err.message);
+    //console.error("error status:", err.response?.status);
+    //console.error("data", err.response?.data);
+    //console.error("message", err.message);
 
     await respond({
       text: "Failed to fetch weather data. Please check the city name and try again.",
     });
   }
 });
+app.command("/brokenbot-randomfact", async ({ ack, respond }) => {
+  await ack();
 
+  try {
+    const response = await axios.get(
+      "https://uselessfacts.jsph.pl/api/v2/facts/random",
+      {
+        params: {
+          language: "en",
+        },
+        headers: {
+          Accept: "application/json",
+        },
+        timeout: 3000,
+      }
+    );
+
+    await respond({
+      text: `Random Fact:\n${response.data.text}`,
+    });
+  } catch (err) {
+    await respond({ text: "Failed to fetch a random fact." });
+  }
+});
 (async () => {
   await app.start();
   console.log("bot is running!");
